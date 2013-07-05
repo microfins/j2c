@@ -23,22 +23,21 @@ struct SubArray : public virtual Bases... {
         typedef value_type              reference; // Good enough for input iterator
         typedef std::input_iterator_tag iterator_category;
 
-        iterator() : p(), pt() {}
-        explicit iterator(::java::lang::Object** p) : p(p), pt(dynamic_cast<value_type>(*p)) {}
+        iterator() : p() {}
+        explicit iterator(::java::lang::Object** p) : p(p) {}
 
-        pointer     operator->()    { return &pt; }
-        reference   operator*()     { return pt; }
+        pointer     operator->()    { return &dynamic_cast<value_type>(*p); }
+        reference   operator*()     { return dynamic_cast<value_type>(*p); }
 
-        iterator&   operator++()    { ++p; pt = dynamic_cast<value_type>(*p); return *this; }
+        iterator&   operator++()    { ++p; return *this; }
         iterator    operator++(int) { iterator tmp(p); ++*this; return tmp; }
-        iterator&   operator--()    { --p; pt = dynamic_cast<value_type>(*p); return *this; }
+        iterator&   operator--()    { --p; return *this; }
         iterator    operator--(int) { iterator tmp(p); ++*this; return tmp; }
 
         bool operator==(iterator rhs) { return p == rhs.p; }
         bool operator!=(iterator rhs) { return !(*this == rhs); }
 
         ::java::lang::Object**  p;
-        value_type              pt;
     };
 
     SubArray() { }
@@ -81,7 +80,7 @@ struct SubArray : public virtual Bases... {
     iterator        begin() { return iterator(this->p); }
     iterator        end() { return iterator(this->p + this->length); }
 
-private:	
+private:
     ::java::lang::Class *getClass0() override { return class_(); }
 
     void set0(size_type i, ::java::lang::Object *x) override
@@ -89,7 +88,7 @@ private:
         if(x && !dynamic_cast<value_type>(x)) {
             throw new ::java::lang::ArrayStoreException();
         }
-        
+
         this->p[i] = x;
     }
 };
