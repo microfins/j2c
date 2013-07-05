@@ -1,0 +1,97 @@
+// Forward declarations for java.lang
+#pragma once
+
+
+namespace java
+{
+    namespace lang
+    {
+        class AbstractMethodError;
+        struct Appendable;
+        class ArithmeticException;
+        class ArrayIndexOutOfBoundsException;
+        class ArrayStoreException;
+        class AssertionError;
+        class Boolean;
+        class Byte;
+        struct CharSequence;
+        class Character;
+        class Class;
+        class ClassCastException;
+        class ClassLoader;
+        class ClassNotFoundException;
+        class CloneNotSupportedException;
+        struct Cloneable;
+        struct Comparable;
+        struct Deprecated;
+        class Double;
+        class Enum;
+        class Error;
+        class Exception;
+        class ExceptionInInitializerError;
+        class Float;
+        class IllegalAccessError;
+        class IllegalAccessException;
+        class IllegalArgumentException;
+        class IllegalMonitorStateException;
+        class IllegalStateException;
+        class IllegalThreadStateException;
+        class IncompatibleClassChangeError;
+        class IndexOutOfBoundsException;
+        class InheritableThreadLocal;
+        class InstantiationError;
+        class InstantiationException;
+        class Integer;
+        class InterruptedException;
+        struct Iterable;
+        class LinkageError;
+        class Long;
+        class Math;
+        class NegativeArraySizeException;
+        class NoClassDefFoundError;
+        class NoSuchFieldError;
+        class NoSuchFieldException;
+        class NoSuchMethodError;
+        class NoSuchMethodException;
+        class NullPointerException;
+        class Number;
+        class NumberFormatException;
+        class Object;
+        class ObjectArray;
+        class OutOfMemoryError;
+        struct Override;
+        class Package;
+        class Process;
+        class ReflectiveOperationException;
+        struct Runnable;
+        class Runtime;
+        class RuntimeException;
+        class RuntimePermission;
+        class Runtime_MyProcess;
+        class Runtime_exec_1;
+        class SecurityException;
+        class SecurityManager;
+        class Short;
+        class StackOverflowError;
+        class StackTraceElement;
+        class String;
+        class StringBuffer;
+        class StringBuilder;
+        class StringBuilder_Cell;
+        class String_1;
+        struct SuppressWarnings;
+        class System;
+        class System_Property;
+        class Thread;
+        class ThreadDeath;
+        class ThreadGroup;
+        class ThreadLocal;
+        class Thread_State;
+        struct Thread_UncaughtExceptionHandler;
+        class Throwable;
+        class UnsatisfiedLinkError;
+        class UnsupportedOperationException;
+        class VirtualMachineError;
+        class Void;
+    } // lang
+} // java
