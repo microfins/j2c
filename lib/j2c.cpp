@@ -8,16 +8,13 @@
 
 #include <stdint.h>
 
-#include <assert.h>
 #include <string.h>
-#include <sys/time.h>
-#include <unistd.h>
 
 #include <string>
 #include <iostream>
 #include <vector>
 
- #include <java/lang/Class.hpp>
+#include <java/lang/Class.hpp>
 
 using namespace java::lang;
 
