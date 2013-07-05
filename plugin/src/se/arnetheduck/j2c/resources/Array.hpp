@@ -9,11 +9,20 @@
 
 extern java::lang::Class *class_(const char16_t *c, int n);
 
+// Array objects implement this so System.arraycopy can fiddle with their bits directly.
+class InternalArrayAccess {
+public:
+    virtual int8_t *raw_ptr() = 0;
+    virtual int num_elements() = 0;
+    virtual int element_size_bytes() = 0;
+};
+
 template<typename T>
 class Array
     : public virtual ::java::lang::Object
     , public virtual ::java::lang::Cloneable
     , public virtual ::java::io::Serializable
+    , public InternalArrayAccess
 {
 public:
     static ::java::lang::Class *class_();
@@ -25,6 +34,18 @@ public:
     typedef const_pointer_type const_iterator;
 
     typedef int size_type;
+
+    virtual int8_t *raw_ptr() override {
+        return (int8_t*) p;
+    }
+
+    virtual int num_elements() override {
+        return length;
+    }
+
+    virtual int element_size_bytes() override {
+        return sizeof(value_type);
+    }
 
     Array() : length(0), p(nullptr) { }
     Array(int n) : length(n), p(n == 0 ? nullptr : new value_type[n])
