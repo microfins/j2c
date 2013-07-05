@@ -1,10 +1,3 @@
-RUNTIME_SOURCES := ../ctest/src
-INCLUDES := $(INCLUDES) -I$(RUNTIME_SOURCES)
-
-CPPFLAGS := $(CPPFLAGS) $(INCLUDES)
-CFLAGS := $(CFLAGS) -pipe
-CXXFLAGS := $(CFLAGS) -std=gnu++11
-
 OBJ := obj
 
 SRCS = \
@@ -13,8 +6,13 @@ SRCS = \
 	java-io.cpp \
 
 OBJS = $(SRCS:%.cpp=$(OBJ)/%.o)
-RUNTIME = libj2c-runtime.a
-CLASSLIB = cruntime/libruntime.a
+RUNTIME = libj2c.a
+
+INCLUDES := $(INCLUDES) -Icruntime/src
+
+CPPFLAGS := $(CPPFLAGS) $(INCLUDES)
+CFLAGS := $(CFLAGS) -pipe -g
+CXXFLAGS := $(CFLAGS) -std=gnu++11
 
 define cc-command
 @mkdir -p $(dir $@);
@@ -26,19 +24,15 @@ all: $(RUNTIME)
 $(OBJS):$(OBJ)/%.o: %.cpp | print-opts
 	$(cc-command)
 
-$(CLASSLIB):
-	@echo Building Avian class library
-	@cd cruntime; make CFLAGS="$(CFLAGS)"
-
-$(RUNTIME): $(OBJS) $(CLASSLIB)
+$(RUNTIME): $(OBJS)
 	@echo Archive $@
 	@rm -f $@
-	@ar rcs $@ $(OBJS) `find cruntime/obj -type f`
+	@ar rcs $@ $(OBJS)
 
 print-opts:
 	@echo Building with \"$(CXX) $(CPPFLAGS) $(CXXFLAGS)\"
 
 clean:
-	cd cruntime; make clean; cd ..; rm -r $(RUNTIME) $(OBJ)
+	rm -r $(OBJ) libj2c.a
 
 .PHONY: all mains clean print-opts

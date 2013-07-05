@@ -12,3 +12,8 @@ void java::io::FileOutputStream::write(int32_t fd, ::int8_tArray* b, int32_t off
     clinit();
     ::write(fd, b->p + offset, length);
 }
+
+void java::io::FileOutputStream::write(int32_t fd, int32_t c) {
+	clinit();
+	::write(fd, &c, 1);
+}

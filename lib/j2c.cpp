@@ -42,7 +42,8 @@ StringArray* make_args(int args, char** argv) {
 }
 
 void init_jvm() {
-	std::cout << "Here we go ...";
+	// We have to set up these here because we'd die with a circular initialization error
+	// if these were global constants (String containing more Strings ...)
 	String::UTF_8_ENCODING() = u"UTF-8"_j;
     String::ISO_8859_1_ENCODING() = u"ISO-8859-1"_j;
     String::LATIN_1_ENCODING() = u"LATIN-1"_j;

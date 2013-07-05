@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
 import org.eclipse.core.runtime.IPath;
@@ -320,12 +321,19 @@ public class StubWriter {
 		if (mb.isConstructor()) {
 			constructors.add(mb);
 		}
+		
+		boolean isNative = Modifier.isNative(mb.getModifiers());
+		
+		if (isNative && isRuntimeImplemented(mb)) {
+			println("#if 0");
+			println("// Provided by libj2c");
+		}
 
 		TransformUtil.printSignature(ctx, out, type, mb, deps, true);
 
 		println();
 		print("{");
-		if (Modifier.isNative(mb.getModifiers())) {
+		if (isNative) {
 			println(" /* native */");
 		} else {
 			println(" /* stub */");
@@ -360,9 +368,25 @@ public class StubWriter {
 		}
 
 		println("}");
-		println();
+		if (isNative && isRuntimeImplemented(mb)) {
+			println("#endif");
+		}
+		println();		
 
 		TransformUtil.defineBridge(ctx, out, type, mb, deps);
+	}
+	
+	private boolean isRuntimeImplemented(IMethodBinding mb) {
+		String className = mb.getDeclaringClass().getQualifiedName();
+		String methodName = mb.getName();
+		if (className.equals("java.lang.System")) {
+			return methodName.equals("currentTimeMillis") ||
+				   methodName.equals("arraycopy") ||
+				   methodName.equals("getProperty");
+		} else if (className.equals("java.io.FileOutputStream")) {
+			return methodName.equals("write");
+		}
+		return false;
 	}
 
 	public void hardDep(ITypeBinding dep) {
