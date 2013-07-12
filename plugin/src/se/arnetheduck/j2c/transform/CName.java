@@ -1,5 +1,6 @@
 package se.arnetheduck.j2c.transform;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -132,9 +133,37 @@ public class CName {
 		return p1 != null && p0.isEqualTo(p1);
 	}
 
+	private static class RelativeBinding {
+		public final IBinding binding;
+		public final ITypeBinding relativeTo;
+		
+		public RelativeBinding(IBinding binding, ITypeBinding relativeTo) {
+			assert binding != null;
+			assert relativeTo != null;
+			this.binding = binding;
+			this.relativeTo = relativeTo;
+		}
+		
+		@Override
+		public boolean equals(Object other) {
+			return other != null && other instanceof RelativeBinding &&
+				   ((RelativeBinding) other).binding == binding &&
+				   ((RelativeBinding) other).relativeTo == relativeTo;
+		}
+		
+		@Override
+		public int hashCode() {
+			return (binding != null ? binding.hashCode() : 0) ^ 
+				   (relativeTo != null ? relativeTo.hashCode() : 0);
+		}
+	}
+	
 	private static Pattern bin = Pattern.compile("\\$\\d+");
 	private static Map<IBinding, String> cache = Collections
 			.synchronizedMap(new WeakHashMap<IBinding, String>());
+	// We need a separate cache for variables that might be closed over.
+	private static Map<RelativeBinding, String> varCache = Collections
+			.synchronizedMap(new WeakHashMap<RelativeBinding, String>());	
 
 	public static String of(ITypeBinding tb) {
 		String name = cache.get(tb);
@@ -264,18 +293,38 @@ public class CName {
 		return null;
 	}
 
-	public static String of(IVariableBinding vb) {
-		String name = cache.get(vb);
+	/**
+	 * Does the same thing as {@link #of(IVariableBinding)} but for the purposes
+	 * of removing field/method name collisions, looks for conflicts in the
+	 * given type binding (i.e. class). This is needed when handling closed over
+	 * variables which have the original definition in one class, but will be 
+	 * instantiated in a separate class that may have a method with the same
+	 * name:
+	 * 
+	 * final Object o = ...;
+	 * return new Thing() {
+	 *   public Object o() { return o; }
+	 * }
+	 */
+	public static String of(IVariableBinding vb, ITypeBinding relativeTo) {
+		String name = varCache.get(new RelativeBinding(vb, relativeTo));
 		if (name != null) {
 			return name;
 		}
 
 		name = keywords(vb.getName());
 
-		if (vb.getDeclaringClass() != null) {
+		if (relativeTo != null) {
+			// Find all methods up the inheritance hierarchy.
+			ArrayList<IMethodBinding> allMethods = new ArrayList<IMethodBinding>();
+			ITypeBinding cursor = relativeTo;
+			while (cursor != null) {
+				allMethods.addAll(Arrays.asList(cursor.getDeclaredMethods()));
+				cursor = cursor.getSuperclass();
+			}
+			IMethodBinding[] methods = relativeTo.getDeclaredMethods();
 			outer: for (;;) {
-				for (IMethodBinding mb : vb.getDeclaringClass()
-						.getDeclaredMethods()) {
+				for (IMethodBinding mb : allMethods) {
 					if (of(mb).equals(name)) {
 						// Methods and variables can have the same name so we
 						// postfix the variable
@@ -288,10 +337,18 @@ public class CName {
 			}
 		}
 		
-		cache.put(vb, name);
-		cache.put(vb.getVariableDeclaration(), name);
+		varCache.put(new RelativeBinding(vb, relativeTo), name);
+		varCache.put(new RelativeBinding(vb.getVariableDeclaration(), relativeTo), name);
 
 		return name;
+	}
+	
+	/**
+	 * Formats a variable name appropriately, with a cache for performance and
+	 * addition of trailing underscores to avoid field/method name conflicts. 
+	 */
+	public static String of(IVariableBinding vb) {
+		return of(vb, vb.getDeclaringClass());
 	}
 
 	public static String of(IPackageBinding pb) {
